@@ -4,6 +4,7 @@ class AnnouncementsController < ApplicationController
 
   before_filter :find_project, :except => [:hide_announcement]
   before_filter :set_timezone, :only => [:new, :edit]
+  before_filter :set_timevalues, :only => [:create, :update]
 
   def index
     @announcements = Announcement.where(:project_id => @project)
@@ -23,7 +24,12 @@ class AnnouncementsController < ApplicationController
   end
 
   def create
-    @announcement = Announcement.new(params[:announcement].merge({:project_id => @project.id}))
+    attributes = {
+      message: params[:announcement][:message],
+      starts_at: @starts_at,
+      ends_at: @ends_at
+    }
+    @announcement = Announcement.new(attributes.merge({:project_id => @project.id}))
 
     if @announcement.save
       redirect_to announcements_path(:project_id => params[:project_id]), :notice => l(:label_announcement_created)
@@ -42,8 +48,12 @@ class AnnouncementsController < ApplicationController
 
   def update
     @announcement = Announcement.find(params[:id])
-
-    if @announcement.update_attributes(params[:announcement])
+    attributes = {
+      message: params[:announcement][:message],
+      starts_at: @starts_at,
+      ends_at: @ends_at
+    }
+    if @announcement.update(attributes)
       redirect_to announcements_url(:project_id => params[:project_id]), :notice => l(:label_announcement_updated)
     else
       render :action => "edit"
@@ -69,5 +79,12 @@ class AnnouncementsController < ApplicationController
     Time.zone = User.current.time_zone
   end
 
-end
+  def time_value(hash, field)
+    Time.zone.local(*(1..5).map { |i| hash["#{field}(#{i}i)"] })
+  end
 
+  def set_timevalues
+    @starts_at = time_value(params[:announcement], 'starts_at')
+    @ends_at = time_value(params[:announcement], 'ends_at')
+  end
+end
