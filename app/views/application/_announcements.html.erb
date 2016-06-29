@@ -14,7 +14,7 @@
     }
 </style>
 
-<%= javascript_tag "$(document).ready(function(){$('h2:first').after($('#announcement'));});" %>
+<%= javascript_tag "$(document).ready(function(){$('h1:first').after($('#announcement'));});" %>
 
 <% unless current_announcements.empty? %>
     <div id="announcement">
