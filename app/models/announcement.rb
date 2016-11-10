@@ -4,7 +4,8 @@ class Announcement < ActiveRecord::Base
   validates_presence_of :message, :message => l(:label_blank)
 
   def self.current_announcements(hide_time,project)
-    Announcement.where( ["starts_at <= now() AND ends_at >= now() AND project_id = ?", project] ).scoping do
+    now = Time.now
+    Announcement.where( ["starts_at <= ? AND ends_at >= ? AND project_id = ?", now, now, project] ).scoping do
       if hide_time.nil?
         Announcement.all
       else
